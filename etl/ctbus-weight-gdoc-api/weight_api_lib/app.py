@@ -19,9 +19,13 @@ google_credentials = google_credentials_response["Parameter"]["Value"]
 print("Google credentials retrieved from SSM")
 
 
+sqs = boto3.client("sqs")
+queue_url = sqs.get_queue_url(QueueName=os.environ["QUEUE_NAME"])["QueueUrl"]
+
+
 def get_weight_data_for_year(
     sheet_id: str, credentials: str, year: str = datetime.datetime.now().strftime("%Y")
-) -> dict[str, float]:
+) -> dict[datetime.datetime, float]:
     """Extract and parse weight data from Google Sheets API for a given year"""
     service_account_info = json.loads(credentials.replace("'", '"'))
     SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
@@ -38,7 +42,7 @@ def get_weight_data_for_year(
     )
 
     rows = result.get("values", [])
-    return {row[0]: float(row[2]) for row in rows if len(row) == 3}
+    return {datetime.datetime.strptime(row[0], "%m%d%Y"): float(row[2]) for row in rows if len(row) == 3}
 
 
 def get_recent_weight_data(sheet_id: str, credentials: str) -> dict[str, float]:
@@ -47,7 +51,14 @@ def get_recent_weight_data(sheet_id: str, credentials: str) -> dict[str, float]:
     last_year = current_year - 1
     data = get_weight_data_for_year(sheet_id, credentials, str(current_year))
     data.update(get_weight_data_for_year(sheet_id, credentials, str(last_year)))
-    return data
+
+    # Only add the last 7 days to the queue
+    last_week = datetime.datetime.now() - datetime.timedelta(days=7)
+    last_week_data = {k: v for k, v in data.items() if k > last_week}
+    # Convert dates to ISO format for SQS message
+    last_week_data = {k.strftime("%Y%m%d"): v for k, v in last_week_data.items()}
+
+    return last_week_data
 
 
 # Utility to manually create a credentials string from a JSON file
@@ -60,9 +71,22 @@ def json_credentials_to_str(cred_fp: str) -> str:
 
 
 def lambda_handler(event, context):
-    return {
-        "statusCode": 200,
-        "body": json.dumps(
-            get_recent_weight_data(os.environ["SHEET_ID"], google_credentials)
-        ),
-    }
+    try:
+        weight_data = get_recent_weight_data(os.environ["SHEET_ID"], google_credentials)
+
+        # Send the data to the SQS queue
+        for date, weight in weight_data.items():
+            sqs.send_message(
+                QueueUrl=queue_url,
+                MessageBody=json.dumps({"id": date, "value": weight, "timestamp": datetime.datetime.now().isoformat()}),
+            )
+
+        return {
+            "statusCode": 200,
+            "body": json.dumps(weight_data),
+        }
+    except Exception as e:
+        return {
+            "statusCode": 500,
+            "body": json.dumps({"error": str(e)}),
+        }

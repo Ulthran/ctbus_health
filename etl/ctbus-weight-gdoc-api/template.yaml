@@ -34,6 +34,7 @@ Resources:
         Variables:
           GOOGLE_CREDENTIALS_PARAM: /ctbus_health/gdocs/credentials
           SHEET_ID: !Sub '{{resolve:ssm:/ctbus_health/gdocs/weight_sheet_id}}'
+          QUEUE_NAME: CtbusHealthQueue
       Policies:
         # Grant the Lambda function permission to read the secure parameters
         - Statement:
@@ -48,6 +49,14 @@ Resources:
               - kms:Decrypt
             Resource:
               - !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/alias/aws/ssm
+        # Grant the Lambda function permission to write to an SQS queue
+        - Statement:
+            Effect: Allow
+            Action:
+              - sqs:SendMessage
+              - sqs:GetQueueUrl
+            Resource:
+              - !Sub arn:${AWS::Partition}:sqs:${AWS::Region}:${AWS::AccountId}:CtbusHealthQueue
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
