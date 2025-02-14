@@ -1,0 +1,64 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: |
+  ctbus-diet-gdoc-api
+  Access for ctbus diet data from Google sheets
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 30
+
+    Tracing: Active
+    # You can add LoggingConfig parameters such as the Logformat, Log Group, and SystemLogLevel or ApplicationLogLevel. Learn more here https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html#sam-function-loggingconfig.
+    LoggingConfig:
+      LogFormat: JSON
+  Api:
+    TracingEnabled: true
+Resources:
+  CtbusHealthDietGdocFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: diet_api_lib/
+      Handler: app.lambda_handler
+      Runtime: python3.13
+      Architectures:
+        - x86_64
+      Events:
+        GetDiet:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /diet
+            Method: get
+      Environment:
+        Variables:
+          GOOGLE_CREDENTIALS_PARAM: /ctbus_health/gdocs/credentials
+          DOC_ID: !Sub '{{resolve:ssm:/ctbus_health/gdocs/diet_doc_id}}'
+      Policies:
+        # Grant the Lambda function permission to read the secure parameters
+        - Statement:
+            Effect: Allow
+            Action:
+              - ssm:GetParameter
+            Resource:
+              - !Sub arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/ctbus_health/gdocs/credentials
+        - Statement:
+            Effect: Allow
+            Action:
+              - kms:Decrypt
+            Resource:
+              - !Sub arn:aws:kms:${AWS::Region}:${AWS::AccountId}:key/alias/aws/ssm
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  CtbusHealthDietGdocApi:
+    Description: API Gateway endpoint URL for Prod stage for ctbus_health diet GDoc function
+    Value: !Sub https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/diet/
+  CtbusHealthDietGdocFunction:
+    Description: ctbus_health diet GDoc Lambda function ARN
+    Value: !GetAtt CtbusHealthDietGdocFunction.Arn
+  CtbusHealthDietGdocFunctionIamRole:
+    Description: Implicit IAM Role created for ctbus_health diet GDoc function
+    Value: !GetAtt CtbusHealthDietGdocFunctionRole.Arn
