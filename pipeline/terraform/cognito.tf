@@ -1,3 +1,51 @@
+data "archive_file" "cognito_presignup" {
+  type        = "zip"
+  source_file = "${path.module}/../cognito_presignup/index.py"
+  output_path = "${path.module}/build/cognito_presignup.zip"
+}
+
+resource "aws_iam_role" "cognito_presignup" {
+  name = "ctbus-food-cognito-presignup"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect    = "Allow"
+      Principal = { Service = "lambda.amazonaws.com" }
+      Action    = "sts:AssumeRole"
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "cognito_presignup_logs" {
+  role       = aws_iam_role.cognito_presignup.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_lambda_function" "cognito_presignup" {
+  function_name    = "ctbus-food-cognito-presignup"
+  role             = aws_iam_role.cognito_presignup.arn
+  runtime          = "python3.13"
+  handler          = "index.lambda_handler"
+  filename         = data.archive_file.cognito_presignup.output_path
+  source_code_hash = data.archive_file.cognito_presignup.output_base64sha256
+  timeout          = 5
+  memory_size      = 128
+
+  environment {
+    variables = {
+      ALLOWED_EMAILS = join(",", var.allowed_emails)
+    }
+  }
+}
+
+resource "aws_lambda_permission" "cognito_presignup" {
+  statement_id  = "AllowCognitoInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.cognito_presignup.function_name
+  principal     = "cognito-idp.amazonaws.com"
+  source_arn    = aws_cognito_user_pool.main.arn
+}
+
 resource "aws_cognito_user_pool" "main" {
   name                     = "ctbus-food-users"
   username_attributes      = ["email"]
@@ -8,6 +56,10 @@ resource "aws_cognito_user_pool" "main" {
       name     = "verified_email"
       priority = 1
     }
+  }
+
+  lambda_config {
+    pre_sign_up = aws_lambda_function.cognito_presignup.arn
   }
 }
 

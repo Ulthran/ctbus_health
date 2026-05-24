@@ -12,3 +12,5 @@ google_client_id     = "123456789-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleus
 google_client_secret = "GOCSPX-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
 # domain_name defaults to food.charliebushman.com
+
+allowed_emails = ["you@gmail.com"]

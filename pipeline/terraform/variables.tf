@@ -53,3 +53,8 @@ variable "domain_name" {
   default     = "food.charliebushman.com"
   description = "Custom domain for the frontend"
 }
+
+variable "allowed_emails" {
+  type        = list(string)
+  description = "Email addresses permitted to sign up via Cognito"
+}
