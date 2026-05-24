@@ -24,6 +24,7 @@ locals {
     "src/main.js"             = { path = "${path.module}/../frontend/src/main.js",             content_type = "application/javascript" }
     "src/auth.js"             = { path = "${path.module}/../frontend/src/auth.js",             content_type = "application/javascript" }
     "src/App.vue"             = { path = "${path.module}/../frontend/src/App.vue",             content_type = "text/plain" }
+    "src/views/Home.vue"      = { path = "${path.module}/../frontend/src/views/Home.vue",      content_type = "text/plain" }
     "src/views/Dashboard.vue" = { path = "${path.module}/../frontend/src/views/Dashboard.vue", content_type = "text/plain" }
     "src/views/Week.vue"      = { path = "${path.module}/../frontend/src/views/Week.vue",      content_type = "text/plain" }
     "src/views/Month.vue"     = { path = "${path.module}/../frontend/src/views/Month.vue",     content_type = "text/plain" }

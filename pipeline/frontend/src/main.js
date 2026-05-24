@@ -1,4 +1,4 @@
-import { ensureAuth, getIdToken } from '/src/auth.js';
+import { ensureAuth, getIdToken, signOut } from '/src/auth.js';
 
 /* global Vue, Vuetify */
 const sfcLoader = window["vue3-sfc-loader"];
@@ -18,7 +18,7 @@ const options = {
 };
 
 (async () => {
-  await ensureAuth(); // redirects to Cognito if not logged in; blocks on /callback until tokens stored
+  const isAuthenticated = await ensureAuth(); // returns false if unauthenticated; blocks on /callback until tokens stored
 
   // Intercept fetch for same-origin and API requests to attach the Bearer token automatically.
   // External calls (OpenFoodFacts, Nominatim, Cognito token endpoint) are not intercepted.
@@ -38,8 +38,9 @@ const options = {
   };
 
   window._sfcOptions = options;
-  const [App, DashboardView, WeekView, MonthView, RecipesView, EntryView, UsageView] = await Promise.all([
+  const [App, HomeView, DashboardView, WeekView, MonthView, RecipesView, EntryView, UsageView] = await Promise.all([
     sfcLoader.loadModule("/src/App.vue", options),
+    sfcLoader.loadModule("/src/views/Home.vue", options),
     sfcLoader.loadModule("/src/views/Dashboard.vue", options),
     sfcLoader.loadModule("/src/views/Week.vue", options),
     sfcLoader.loadModule("/src/views/Month.vue", options),
@@ -49,7 +50,8 @@ const options = {
   ]);
 
   const vuetify = Vuetify.createVuetify({ theme: { defaultTheme: "light" } });
-  const app = Vue.createApp(App).use(vuetify);
+  const app = Vue.createApp(App, { isAuthenticated }).use(vuetify);
+  app.component("HomeView", HomeView);
   app.component("DashboardView", DashboardView);
   app.component("WeekView", WeekView);
   app.component("MonthView", MonthView);

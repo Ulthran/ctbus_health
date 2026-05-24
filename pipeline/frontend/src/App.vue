@@ -1,5 +1,6 @@
 <template>
-  <v-app>
+  <home-view v-if="!isAuthenticated" />
+  <v-app v-else>
     <v-navigation-drawer v-model="drawer" temporary>
       <v-list nav density="compact" class="mt-2">
         <v-list-item
@@ -15,6 +16,12 @@
           :active="view === 'usage'"
           active-color="green-darken-2"
           @click="view = 'usage'; drawer = false"
+        />
+        <v-divider class="my-2" />
+        <v-list-item
+          prepend-icon="fas fa-right-from-bracket"
+          title="Sign out"
+          @click="signOut"
         />
       </v-list>
     </v-navigation-drawer>
@@ -68,8 +75,13 @@
 </template>
 
 <script>
+import { signOut } from '/src/auth.js';
+
 export default {
   name: "App",
+  props: {
+    isAuthenticated: { type: Boolean, default: false },
+  },
   data() {
     return {
       view: "day",
@@ -91,6 +103,7 @@ export default {
       window._ctbus_pending_recipe = recipe;
       this.view = "entry";
     },
+    signOut,
   },
 };
 </script>

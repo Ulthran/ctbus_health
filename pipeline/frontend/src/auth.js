@@ -116,17 +116,25 @@ async function _handleCallback() {
 }
 
 export async function ensureAuth() {
-  if (!COGNITO_DOMAIN) return; // local dev — skip auth entirely
+  if (!COGNITO_DOMAIN) return true; // local dev — always authenticated
 
   if (window.location.pathname === '/callback') {
     await _handleCallback();
     await new Promise(() => {}); // block — page is redirecting
-    return;
+    return false;
   }
 
   const token = await getIdToken();
-  if (!token) {
-    redirectToLogin();
-    await new Promise(() => {}); // block — page is redirecting
+  return !!token;
+}
+
+export function signOut() {
+  localStorage.removeItem(KEY_ID_TOKEN);
+  localStorage.removeItem(KEY_REFRESH);
+  localStorage.removeItem(KEY_EXPIRY);
+  if (COGNITO_DOMAIN && CLIENT_ID) {
+    window.location.href = `https://${COGNITO_DOMAIN}/logout?client_id=${CLIENT_ID}&logout_uri=${encodeURIComponent(window.location.origin)}`;
+  } else {
+    window.location.href = '/';
   }
 }
