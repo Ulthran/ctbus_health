@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>ctbus health — entry</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/vuetify@3.8.10/dist/vuetify.min.css"
+      integrity="sha384-ZoPVozdjzH+jWXpaBM47rBZy9ofMIg8tuIIAsAf5YgJ0wYs5XzytOpaLxiu93Off"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"
+      integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ=="
+      crossorigin="anonymous"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script
+      src="https://cdn.jsdelivr.net/npm/vue@3.5.17/dist/vue.global.prod.js"
+      integrity="sha384-H2xBKUDQ/xne/c7DBZjrLhCc6tXYiUu5WAyegWsUsKWMopvozacrKINTNsuJHeFG"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/vuetify@3.8.10/dist/vuetify.min.js"
+      integrity="sha384-urAAOfIFA65yosh73wWyHPAb2WPRsQ6tVB2lLGg3InOxNxvfJAwY4cTkOfsh2Jcf"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/vue3-sfc-loader@0.9.5/dist/vue3-sfc-loader.js"
+      integrity="sha384-PZ/5Vu0PL2YXIi4MMqK0IC4MAQmOqYCJcT1COTIPapsnHFYqN3GW+pQdW7uVFCSm"
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      // All four replaced by Terraform on deploy. Placeholder values = local dev mode.
+      window.CTBUS_S3             = "CTBUS_S3_PLACEHOLDER";
+      window.CTBUS_API            = "CTBUS_API_PLACEHOLDER";
+      window.CTBUS_COGNITO_DOMAIN = "CTBUS_COGNITO_DOMAIN_PLACEHOLDER";
+      window.CTBUS_CLIENT_ID      = "CTBUS_CLIENT_ID_PLACEHOLDER";
+    </script>
+    <script src="https://unpkg.com/@zxing/library@0.21.3/umd/index.min.js"></script>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

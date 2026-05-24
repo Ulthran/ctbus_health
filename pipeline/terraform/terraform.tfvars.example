@@ -1,0 +1,14 @@
+aws_region              = "us-east-1"
+bucket_name             = "ctbus-health-data"
+telegram_bot_token      = "7123456789:AAFxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+telegram_webhook_secret = "your-random-secret-string-here"
+usda_api_key            = "your-usda-api-key"
+tavily_api_key          = "tvly-your-tavily-api-key"
+# bedrock_model_id defaults to us.anthropic.claude-haiku-4-5-20251001-v1:0
+
+# Google OAuth — create at console.cloud.google.com > APIs & Services > Credentials
+# Authorized redirect URI: https://ctbus-food-auth.auth.us-east-1.amazoncognito.com/oauth2/idpresponse
+google_client_id     = "123456789-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com"
+google_client_secret = "GOCSPX-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+# domain_name defaults to food.charliebushman.com
